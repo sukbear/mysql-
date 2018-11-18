@@ -12,9 +12,45 @@ CREATE TABLE IF NOT EXISTS table_name (
   PRIMARY KEY (id)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
+*********************************************
+explain的使用
+ explain命令是查看查询优化器如何决定执行查询的主要方法 \G 按列显示
+
+mysql> explain select id from users where id = 1 \G
+*************************** 1. row ***************************
+           id: 1
+  select_type: SIMPLE
+        table: users
+   partitions: NULL
+         type: const    type {range(最低  range 对索引进行范围检索) ref (普通索引) consts 单表中最多只有一个匹配行（主键或者唯一索引}}  
+possible_keys: PRIMARY
+          key: PRIMARY
+      key_len: 4
+          ref: const
+         rows: 1
+     filtered: 100.00
+        Extra: Using index
+1 row in set, 1 warning (0.00 sec)
+
+
+ type {range(最低  range 对索引进行范围检索) ref (普通索引) consts 单表中最多只有一个匹配行（主键或者唯一索引}} 
+ 反例：explain 表的结果，type=index，索引物理文件全扫描，速度非常慢，这个 index级别比较range 还低，与全表扫描是小巫见大巫。 
+rows(预估要查询的行) )
+extra(using where, using index（全覆盖） 避免回表) 
+
+def:索引包含（亦称覆盖）所有需要查询的字段的值
+覆盖索引就是从索引中直接获取查询结果，要使用覆盖索引需要注意select查询列中包含在索引列中；
+where条件包含索引列或者复合索引的前导列；查询结果的字段长度尽可能少。
+**********************************************
+经验法则：：考虑全局基数和选择性
+
+count(distinct left(列名, 索引长度))/count(*) 
+计算列的完整性
+
+多列索引
+最左前缀匹配
 
 **********************************************
-
 
 字段（用最小的精度来保证字段的可用性和范围）
 
